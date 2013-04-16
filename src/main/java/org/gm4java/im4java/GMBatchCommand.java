@@ -16,7 +16,7 @@
 package org.gm4java.im4java;
 
 import org.gm4java.engine.GMException;
-import org.gm4java.engine.GMService;
+import org.gm4java.engine.GMExecutor;
 import org.im4java.core.ImageCommand;
 import org.im4java.process.ErrorConsumer;
 import org.im4java.process.OutputConsumer;
@@ -37,21 +37,21 @@ import javax.annotation.Nonnull;
  * 
  */
 public class GMBatchCommand extends ImageCommand {
-    private final GMService service;
+    private final GMExecutor executor;
     private OutputConsumer outputConsumer;
     private ErrorConsumer errorConsumer;
 
     /**
-     * Construct a new instance of {@link GMBatchCommand} that uses given service to execute specified command.
+     * Construct a new instance of {@link GMBatchCommand} that uses given executor to execute specified command.
      * 
-     * @param service
-     *            service to execute the command
+     * @param executor
+     *            executor to execute the command
      * @param command
      *            command to be executed.
      */
-    public GMBatchCommand(@Nonnull GMService service, @Nonnull String command) {
+    public GMBatchCommand(@Nonnull GMExecutor executor, @Nonnull String command) {
         super(command);
-        this.service = service;
+        this.executor = executor;
     }
 
     /**
@@ -75,14 +75,14 @@ public class GMBatchCommand extends ImageCommand {
     /**
      * {@inheritDoc}
      * 
-     * This implementation uses {@link GMService} to execute the command.
+     * This implementation uses {@link GMExecutor} to execute the command.
      */
     @Override
     protected int run(@Nonnull LinkedList<String> pArgs) throws Exception {
 
         int rc;
         try {
-            String result = service.execute(pArgs);
+            String result = executor.execute(pArgs);
             if (outputConsumer != null && result != null) outputConsumer.consumeOutput(stringToStream(result));
             rc = 0;
         } catch (GMException e) {

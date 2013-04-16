@@ -20,32 +20,36 @@ import java.util.List;
 import javax.annotation.Nonnull;
 
 /**
- * Defines the GraphicsMagick service interface.
- * <p>
- * Implementations of this interface must ensure all the methods defined in this interface are thread safe.
+ * An interface to execute command using the underlying GraphicsMagick Process.
  * 
  * @author Kenneth Xu
  * 
  */
-public interface GMService extends GMExecutor {
+public interface GMExecutor {
     /**
-     * Executes the GraphisMagick command and return the result.
+     * Executes the command using the underlying GraphicsMagick process.
      * <p>
-     * This is a convenient method to {@link #getConnection() get the connection},
-     * {@link GMConnection#execute(String, String...) execute} the command once and {@link GMConnection#close() close}
-     * it. It is functionally equivalent to code below, but actual implementation may optimize this for better
-     * efficiency.
+     * This method can be used in different ways explained in the following sections using an example of drawing text NO
+     * IMAGE on a background defined by in.png.
+     * <p>
+     * One way is to prepare entire command line with proper space separation of GraphicsMagick arguments and pass it as
+     * one single string to command parameter. You don't need to use arguments parameter at all. Using this way, you
+     * need to make sure special characters are escaped and arguments with space are quoted. e.g.,
      * 
      * <pre>
-     * final GMConnection connection = gmService.getConnection();
-     * try {
-     *     return connection.execute(command, argument1, argument2, ...);
-     * } finally {
-     *     connection.close();
-     * }
+     * <code>
+     * execute("convert in.png -draw \"text 50 100 \"\"NO IMAGE\"\"\" out.png");
+     * </code>
      * </pre>
-     * <p>
-     * This method is thread safe.
+     * 
+     * A better way is to pass the command and arguments separately. The same example can now be written as below.
+     * Notice that you don't need to add the quotes and escape the quotes anymore.
+     * 
+     * <pre>
+     * <code>
+     * execute("convert", "in.png", "-draw", "text 50 100 \"NO IMAGE\"", "out.png");
+     * </code>
+     * </pre>
      * 
      * @param command
      *            the command to be executed
@@ -58,27 +62,13 @@ public interface GMService extends GMExecutor {
      *             when GraphicsMagick returns error executing the command
      * @throws GMServiceException
      *             when there is error communicating with the underlying GraphicsMagick process
+     * @see #execute(List)
      */
     String execute(@Nonnull String command, String... arguments) throws GMException, GMServiceException;
 
     /**
      * Executes the command using the underlying GraphicsMagick process. GraphicsMagick command and its arguments are
      * passed in as a list of strings.
-     * <p>
-     * This is a convenient method to {@link #getConnection() get the connection}, {@link GMConnection#execute(List)
-     * execute} the command once and {@link GMConnection#close() close} it. It is functionally equivalent to code below,
-     * but actual implementation may optimize this for better efficiency.
-     * 
-     * <pre>
-     * final GMConnection connection = gmService.getConnection();
-     * try {
-     *     return connection.execute(command);
-     * } finally {
-     *     connection.close();
-     * }
-     * </pre>
-     * <p>
-     * This method is thread safe.
      * 
      * @param command
      *            the command and arguments to be executed
@@ -94,17 +84,4 @@ public interface GMService extends GMExecutor {
      * @see #execute(String, String...)
      */
     String execute(@Nonnull List<String> command) throws GMException, GMServiceException;
-
-    /**
-     * Gets an instance of {@link GMConnection}. Depends on the implementation, the instance can be newly created or
-     * from a pool.
-     * <p>
-     * This method is thread safe.
-     * 
-     * @return an instance of {@linkplain GMConnection}
-     * @throws GMServiceException
-     *             when communicate error occurs between the physical GraphicsMagick process.
-     */
-    @Nonnull
-    GMConnection getConnection() throws GMServiceException;
 }
