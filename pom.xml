@@ -36,9 +36,9 @@
         </license>
     </licenses>
     <scm>
-        <url>http://kennethxublogsource.googlecode.com/svn/trunk/gm4java</url>
-        <connection>scm:svn:http://kennethxublogsource.googlecode.com/svn/trunk/gm4java</connection>
-        <developerConnection>scm:svn:https://kennethxublogsource.googlecode.com/svn/trunk/gm4java</developerConnection>
+		<connection>scm:git:git@github.com:kennethxu/gm4java.git</connection>
+		<developerConnection>scm:git:git@github.com:kennethxu/gm4java.git</developerConnection>
+		<url>git@github.com:kennethxu/gm4java.git</url>
     </scm>
     <developers>
         <developer>
