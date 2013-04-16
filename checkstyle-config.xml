@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.3//EN" "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+
+<!--
+    This configuration file was written by the eclipse-cs plugin configuration editor
+-->
+<module name="Checker">
+  <property name="severity" value="${checkstyle.severity}" default="error"/>
+  <module name="TreeWalker">
+    <module name="FileContentsHolder"/>
+    <module name="JavadocMethod">
+      <property name="scope" value="protected"/>
+      <property name="allowUndeclaredRTE" value="true"/>
+      <property name="allowThrowsTagsForSubclasses" value="true"/>
+      <property name="suppressLoadErrors" value="true"/>
+    </module>
+    <module name="JavadocType">
+      <property name="scope" value="protected"/>
+    </module>
+    <module name="JavadocVariable">
+      <property name="scope" value="protected"/>
+    </module>
+    <module name="JavadocStyle">
+      <property name="scope" value="protected"/>
+    </module>
+    <module name="ConstantName">
+      <property name="id" value="includesPrivate"/>
+      <property name="applyToPrivate" value="false"/>
+    </module>
+    <module name="LocalFinalVariableName"/>
+    <module name="LocalVariableName"/>
+    <module name="MemberName"/>
+    <module name="MethodName">
+      <property name="id" value="noUnderscore"/>
+    </module>
+    <module name="PackageName"/>
+    <module name="ParameterName"/>
+    <module name="StaticVariableName"/>
+    <module name="TypeName"/>
+    <module name="AvoidStarImport"/>
+    <module name="IllegalImport"/>
+    <module name="RedundantImport"/>
+    <module name="UnusedImports"/>
+    <module name="MethodLength"/>
+    <module name="ParameterNumber"/>
+    <module name="LineLength">
+      <property name="max" value="128"/>
+      <property name="tabWidth" value="4"/>
+    </module>
+    <module name="EmptyForIteratorPad"/>
+    <module name="MethodParamPad"/>
+    <module name="NoWhitespaceAfter">
+      <property name="tokens" value="BNOT,DEC,DOT,INC,LNOT,UNARY_MINUS,UNARY_PLUS"/>
+    </module>
+    <module name="NoWhitespaceBefore"/>
+    <module name="OperatorWrap"/>
+    <module name="ParenPad"/>
+    <module name="TypecastParenPad"/>
+    <module name="WhitespaceAfter"/>
+    <module name="WhitespaceAround"/>
+    <module name="ModifierOrder"/>
+    <module name="RedundantModifier"/>
+    <module name="AvoidNestedBlocks"/>
+    <module name="EmptyBlock"/>
+    <module name="LeftCurly"/>
+    <module name="NeedBraces">
+      <property name="severity" value="ignore"/>
+      <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
+    </module>
+    <module name="RightCurly"/>
+    <module name="AvoidInlineConditionals">
+      <property name="severity" value="ignore"/>
+      <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
+    </module>
+    <module name="DoubleCheckedLocking"/>
+    <module name="EmptyStatement"/>
+    <module name="EqualsHashCode"/>
+    <module name="HiddenField">
+      <property name="severity" value="ignore"/>
+      <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
+    </module>
+    <module name="IllegalInstantiation"/>
+    <module name="InnerAssignment"/>
+    <module name="MagicNumber"/>
+    <module name="MissingSwitchDefault"/>
+    <module name="RedundantThrows">
+      <property name="suppressLoadErrors" value="true"/>
+    </module>
+    <module name="SimplifyBooleanExpression"/>
+    <module name="SimplifyBooleanReturn"/>
+    <module name="DesignForExtension">
+      <property name="severity" value="ignore"/>
+      <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
+    </module>
+    <module name="FinalClass"/>
+    <module name="HideUtilityClassConstructor"/>
+    <module name="InterfaceIsType"/>
+    <module name="VisibilityModifier"/>
+    <module name="ArrayTypeStyle"/>
+    <module name="FinalParameters">
+      <property name="severity" value="ignore"/>
+      <metadata name="net.sf.eclipsecs.core.lastEnabledSeverity" value="inherit"/>
+    </module>
+    <module name="TodoComment"/>
+    <module name="UpperEll"/>
+    <module name="RegexpSinglelineJava">
+      <property name="format" value="\s+$"/>
+      <property name="message" value="Line has training spaces"/>
+      <property name="ignoreComments" value="true"/>
+    </module>
+    <module name="ConstantName">
+      <property name="applyToPrivate" value="false"/>
+    </module>
+    <module name="MethodName">
+      <property name="format" value="^[a-z][a-zA-Z0-9_]*$"/>
+    </module>
+  </module>
+  <module name="JavadocPackage"/>
+  <module name="NewlineAtEndOfFile">
+    <property name="lineSeparator" value="lf"/>
+  </module>
+  <module name="Translation"/>
+  <module name="FileLength"/>
+  <module name="FileTabCharacter"/>
+  <module name="RegexpSingleline">
+    <property name="format" value="\s\s+$"/>
+    <property name="message" value="Line has trailing spaces."/>
+  </module>
+  <module name="SuppressionFilter">
+    <property name="file" value="${samedir}/suppressions.xml" default="checkstyle/nosuppression.xml"/>
+  </module>
+  <module name="SuppressWithNearbyCommentFilter">
+    <metadata name="net.sf.eclipsecs.core.comment" value="Ignore ? rule for next ? lines"/>
+    <property name="commentFormat" value="SUPPRESS CHECKSTYLE (\w+) FOR (\d+) LINES BECAUSE"/>
+    <property name="checkFormat" value="$1"/>
+    <property name="influenceFormat" value="$2"/>
+  </module>
+  <module name="SuppressWithNearbyCommentFilter">
+    <metadata name="net.sf.eclipsecs.core.comment" value="Ignore ? rule for next line"/>
+    <property name="commentFormat" value="SUPPRESS CHECKSTYLE (\w+) BECAUSE"/>
+    <property name="checkFormat" value="$1"/>
+    <property name="influenceFormat" value="1"/>
+  </module>
+  <module name="SuppressWithNearbyCommentFilter">
+    <metadata name="net.sf.eclipsecs.core.comment" value="Ignore rules for test code"/>
+    <property name="commentFormat" value="SUPPRESS CHECKSTYLE FOR TEST CODE"/>
+    <property name="checkFormat" value="(MagicNumber|Javadoc|IllegalThrows|AvoidStarImport|ConstantName|VisibilityModifier|MethodName)"/>
+    <property name="influenceFormat" value="2000"/>
+  </module>
+</module>
