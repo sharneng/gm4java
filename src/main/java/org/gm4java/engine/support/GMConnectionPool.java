@@ -31,13 +31,13 @@ class GMConnectionPool extends GenericObjectPool<PooledGMConnection> {
     private GMConnectionPool(Factory factory, GMConnectionPoolConfig config) {
         super(factory, notNull(config));
         factory.pool = this;
-        evictAfterNumberOfUse = config.evictAfterNumberOfUse;
-        setGMPath(config.gmPath);
+        evictAfterNumberOfUse = config.getEvictAfterNumberOfUse();
+        setGMPath(config.getGMPath());
     }
 
-    private static GMConnectionPoolConfig notNull(GMConnectionPoolConfig config) {
+    private static GenericObjectPool.Config notNull(GMConnectionPoolConfig config) {
         if (config == null) throw new NullPointerException("config");
-        return config;
+        return config.getConfig();
     }
 
     /**

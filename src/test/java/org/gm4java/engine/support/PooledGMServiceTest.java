@@ -77,7 +77,7 @@ public class PooledGMServiceTest {
     public void constructor_passesConfigToPool() throws Exception {
         config = new GMConnectionPoolConfig();
         final String expectedGMPath = PATH_TO_GM;
-        config.gmPath = expectedGMPath;
+        config.setGMPath(expectedGMPath);
         sut = new PooledGMService(config);
         ReaderWriterProcess.Factory factory = mock(ReaderWriterProcess.Factory.class);
         ReaderWriterProcess process = mock(ReaderWriterProcess.class);
