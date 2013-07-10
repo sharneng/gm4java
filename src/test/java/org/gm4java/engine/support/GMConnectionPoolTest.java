@@ -19,6 +19,8 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+
 import org.gm4java.engine.GMServiceException;
 import org.junit.After;
 import org.junit.Before;
@@ -95,6 +97,7 @@ public class GMConnectionPoolTest {
     }
 
     @Test
+    @SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
     public void constructor_chokes_onNullConfig() throws Exception {
         exception.expect(NullPointerException.class);
         exception.expectMessage("config");
@@ -205,6 +208,7 @@ public class GMConnectionPoolTest {
     }
 
     @Test
+    @SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
     public void setGMPath_chokes_onNullPath() throws Exception {
         exception.expect(NullPointerException.class);
         exception.expectMessage("gmPath");

@@ -19,6 +19,8 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+
 import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMService;
 import org.im4java.core.CommandException;
@@ -78,6 +80,7 @@ public class GMBatchCommandTest {
     }
 
     @Test
+    @SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
     public void run_chokes_whenErrorConsumerIsNull() throws Exception {
         // create command
         final String command = "bad";
@@ -115,6 +118,7 @@ public class GMBatchCommandTest {
     }
 
     @Test
+    @SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
     public void run_works_whenOutputConsumerIsNull() throws Exception {
         // create command
         final String command = "convert";

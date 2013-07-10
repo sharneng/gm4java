@@ -15,6 +15,8 @@
  */
 package org.gm4java.engine.support;
 
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+
 import org.gm4java.engine.GMConnection;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +37,7 @@ public class BasicGMConnectionTest extends AbstractGMConnectionTest {
     }
 
     @Test
+    @SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
     public void constructor_chokes_onNullPath() throws Exception {
         exception.expect(NullPointerException.class);
         exception.expectMessage("process");

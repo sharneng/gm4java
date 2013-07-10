@@ -19,6 +19,8 @@ package org.gm4java.engine.support;
 //import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+
 import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMConnection;
 import org.gm4java.engine.GMServiceException;
@@ -55,6 +57,7 @@ public class PooledGMConnectionTest extends AbstractGMConnectionTest {
     }
 
     @Test
+    @SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
     public void constructor_chokes_onNullPath() throws Exception {
         exception.expect(NullPointerException.class);
         exception.expectMessage("pool");
