@@ -94,6 +94,18 @@ public class GMBatchCommand extends ImageCommand {
         return rc;
     }
 
+    /**
+     * Unlike other implementation of {@link ImageCommand}, {@link GMBatchCommand} uses {@link GMExecutor} instead of
+     * starting a new GraphicsMagick process. This makes {@link #setSearchPath(String)} method useless. Calling this
+     * method always result in {@link UnsupportedOperationException}.
+     */
+    @Override
+    @Deprecated
+    public void setSearchPath(String pSearchPath) {
+        throw new UnsupportedOperationException("GMBatchCommand does not support setSearchPath because it uses the"
+                + " GMExecutor passed to the constructor instead of starting a GraphicsMagick process itself.");
+    }
+
     @Nonnull
     private InputStream stringToStream(@Nonnull String s) {
         return new ByteArrayInputStream(s.getBytes());

@@ -4,3 +4,10 @@
 *.jar
 *.war
 *.ear
+
+/target
+
+# Eclipse related #
+.classpath
+.project
+.settings
