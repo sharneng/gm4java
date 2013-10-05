@@ -14,7 +14,7 @@
     </parent>
 
 	<name>gm4java</name>
-	<url>http://maven.apache.org</url>
+	<url>http://kennethxu.blogspot.com/2013/03/integrate-java-and-graphicsmagick.html</url>
 
 		<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
