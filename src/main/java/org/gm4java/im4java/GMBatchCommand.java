@@ -98,6 +98,9 @@ public class GMBatchCommand extends ImageCommand {
      * Unlike other implementation of {@link ImageCommand}, {@link GMBatchCommand} uses {@link GMExecutor} instead of
      * starting a new GraphicsMagick process. This makes {@link #setSearchPath(String)} method useless. Calling this
      * method always result in {@link UnsupportedOperationException}.
+     * 
+     * @param pSearchPath
+     *            not used
      */
     @Override
     @Deprecated

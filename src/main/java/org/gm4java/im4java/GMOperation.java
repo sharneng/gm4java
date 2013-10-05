@@ -15,12 +15,11 @@
  */
 package org.gm4java.im4java;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.CheckForNull;
@@ -141,13 +140,23 @@ public class GMOperation extends org.im4java.core.GMOperation {
             final EnumSet<GeometryAnnotation> matched = EnumSet.copyOf(used);
             matched.retainAll(mutuallyExclusive);
             if (matched.size() > 1) {
-                throw new IllegalArgumentException("Geometry annotations " + StringUtils.join(matched.toArray())
+                throw new IllegalArgumentException("Geometry annotations " + join(matched, "and")
                         + "are mutually exclusive");
             }
             if (shouldHaveAtLeastOne && (matched.size() != 1)) {
                 throw new IllegalArgumentException("One of the following geometry annotations must be used: "
-                        + StringUtils.join(mutuallyExclusive.toArray()));
+                        + join(mutuallyExclusive, "or"));
             }
+        }
+
+        private static String join(Collection<?> set, String andOr) {
+            StringBuffer buf = new StringBuffer();
+            Iterator<?> i = set.iterator();
+            for (int n = set.size() - 2; n > 0; n--) {
+                buf.append(i.next()).append(", ");
+            }
+            buf.append(i.next()).append(' ').append(andOr).append(' ').append(i.next());
+            return buf.toString();
         }
     }
 
@@ -276,10 +285,10 @@ public class GMOperation extends org.im4java.core.GMOperation {
      * @return Builder object for chained options setup.
      */
     public GMOperation font(final String style, final int size, final String color) {
-        if (StringUtils.isBlank(style)) {
+        if (isBlank(style)) {
             throw new IllegalArgumentException("Text font style must be defined");
         }
-        if (StringUtils.isBlank(color)) {
+        if (isBlank(color)) {
             throw new IllegalArgumentException("Text font color must be defined");
         }
         font(style);
@@ -301,7 +310,7 @@ public class GMOperation extends org.im4java.core.GMOperation {
      * @return Builder object for chained options setup.
      */
     public GMOperation drawText(final String text, final int offsetX, final int offsetY) {
-        if (StringUtils.isBlank(text)) {
+        if (isBlank(text)) {
             throw new IllegalArgumentException("Text string must be defined");
         }
         draw(String.format("text %d %d '%s'", offsetX, offsetY, text));
@@ -375,7 +384,7 @@ public class GMOperation extends org.im4java.core.GMOperation {
         return this;
     }
 
-    private String resample(final int width, final int height, final Collection<GeometryAnnotation> annotations) {
+    private static String resample(final int width, final int height, final Collection<GeometryAnnotation> annotations) {
         if ((width < 1) || (height < 1)) {
             throw new IllegalArgumentException("Target height and width both should be greater than zero");
         }
@@ -389,6 +398,10 @@ public class GMOperation extends org.im4java.core.GMOperation {
             buf.append(entry.asAnnotation());
         }
         return buf.toString();
+    }
+
+    private static boolean isBlank(String s) {
+        return (s == null) || s.length() == 0;
     }
 
 }

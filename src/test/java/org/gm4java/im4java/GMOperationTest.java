@@ -244,7 +244,7 @@ public class GMOperationTest {
            .limitThreads(42)
            .source(source, 1600, 1200)
            .shave(1, 2);
-        sut.resize(640, 480, EnumSet.of( GeometryAnnotation.ForceDimensions, GeometryAnnotation.DownsizeOnly))
+        sut.resize(640, 480, EnumSet.of(GeometryAnnotation.ForceDimensions, GeometryAnnotation.DownsizeOnly))
            .rotate(90.0, RotationAnnotation.WidthExceedsHeightOnly)
            .crop(320, 240, 10, 20)
            .colorspace("COLORSPACE");
