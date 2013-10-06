@@ -26,9 +26,8 @@ import javax.annotation.CheckForNull;
 
 /**
  * 
- * This class wraps the GM command in interactive or batch mode.
- * <p>
- * Note: Does not support asynchronous mode; Does not support BufferedImage
+ * This class extends the im4java version of GMOperation and provide a list of convenience methods to ease the
+ * construction of the image command for GraphicsMagick.
  * 
  * @author Michael Magpayo
  * 
