@@ -18,6 +18,7 @@ package org.gm4java.engine.support;
 import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMServiceException;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -39,10 +40,13 @@ class PooledGMConnection extends BasicGMConnection {
     }
 
     @Override
-    protected String execute(String command, @Nonnull List<String> arguments) throws GMException, GMServiceException {
+    protected String execute(String command, @Nonnull List<String> arguments) throws IOException, GMException,
+            GMServiceException {
         count++;
         try {
             return super.execute(command, arguments);
+        } catch (IOException e) {
+            throw e;
         } catch (GMException e) {
             throw e;
         } catch (RuntimeException e) {

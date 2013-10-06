@@ -20,6 +20,7 @@ import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMService;
 import org.gm4java.engine.GMServiceException;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -33,7 +34,7 @@ import javax.annotation.Nonnull;
  * 
  */
 public class PooledGMService implements GMService {
-    private GMConnectionPool pool;
+    private final GMConnectionPool pool;
 
     /**
      * Construct a new instance of {@linkplain PooledGMService} with given pool configuration.
@@ -53,7 +54,8 @@ public class PooledGMService implements GMService {
      * {@inheritDoc}
      */
     @Override
-    public String execute(@Nonnull String command, String... arguments) throws GMException, GMServiceException {
+    public String execute(@Nonnull String command, String... arguments) throws IOException, GMException,
+            GMServiceException {
         PooledGMConnection connection = pool.borrowObject();
         try {
             return connection.execute(command, arguments);
@@ -63,7 +65,7 @@ public class PooledGMService implements GMService {
     }
 
     @Override
-    public String execute(List<String> command) throws GMException, GMServiceException {
+    public String execute(List<String> command) throws IOException, GMException, GMServiceException {
         PooledGMConnection connection = pool.borrowObject();
         try {
             return connection.execute(command);
@@ -98,13 +100,14 @@ public class PooledGMService implements GMService {
         }
 
         @Override
-        public String execute(@Nonnull String command, String... arguments) throws GMException, GMServiceException {
+        public String execute(@Nonnull String command, String... arguments) throws IOException, GMException,
+                GMServiceException {
             assertConnectionNotClosed();
             return real.execute(command, arguments);
         }
 
         @Override
-        public String execute(List<String> command) throws GMException, GMServiceException {
+        public String execute(List<String> command) throws IOException, GMException, GMServiceException {
             assertConnectionNotClosed();
             return real.execute(command);
         }

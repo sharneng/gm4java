@@ -15,6 +15,7 @@
  */
 package org.gm4java.engine;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -54,12 +55,15 @@ public interface GMService extends GMExecutor {
      * @return the output from GraphicsMagick as the result of executing the command
      * @throws NullPointerException
      *             when command is null
+     * @throws IOException
+     *             when GM encounter IO error executing the command
      * @throws GMException
-     *             when GraphicsMagick returns error executing the command
+     *             when GraphicsMagick returns non-IO error executing the command
      * @throws GMServiceException
      *             when there is error communicating with the underlying GraphicsMagick process
      */
-    String execute(@Nonnull String command, String... arguments) throws GMException, GMServiceException;
+    @Override
+    String execute(@Nonnull String command, String... arguments) throws IOException, GMException, GMServiceException;
 
     /**
      * Executes the command using the underlying GraphicsMagick process. GraphicsMagick command and its arguments are
@@ -87,13 +91,16 @@ public interface GMService extends GMExecutor {
      *             when command is null
      * @throws IllegalArgumentException
      *             when command is an empty list.
+     * @throws IOException
+     *             when GM encounter IO error executing the command
      * @throws GMException
-     *             when GraphicsMagick returns error executing the command
+     *             when GraphicsMagick returns non-IO error executing the command
      * @throws GMServiceException
      *             when there is error communicating with the underlying GraphicsMagick process
      * @see #execute(String, String...)
      */
-    String execute(@Nonnull List<String> command) throws GMException, GMServiceException;
+    @Override
+    String execute(@Nonnull List<String> command) throws IOException, GMException, GMServiceException;
 
     /**
      * Gets an instance of {@link GMConnection}. Depends on the implementation, the instance can be newly created or

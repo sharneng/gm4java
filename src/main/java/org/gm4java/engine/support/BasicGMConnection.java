@@ -41,7 +41,7 @@ class BasicGMConnection implements GMConnection {
     private static final int NORMAL_BUFFER_SIZE = 4096;
     private static final String EOL = System.getProperty("line.separator");
     private ReaderWriterProcess process;
-    private StringBuffer sb = new StringBuffer();
+    private final StringBuffer sb = new StringBuffer();
 
     public BasicGMConnection(@Nonnull ReaderWriterProcess process) throws GMServiceException {
         if (process == null) throw new NullPointerException("process");
@@ -49,14 +49,14 @@ class BasicGMConnection implements GMConnection {
     }
 
     @Override
-    public final String execute(@Nonnull String command, @CheckForNull String... arguments) throws GMException,
-            GMServiceException {
+    public final String execute(@Nonnull String command, @CheckForNull String... arguments) throws IOException,
+            GMException, GMServiceException {
         if (command == null) throw new NullPointerException("Argument 'command' must not be null");
         return execute(command, arguments == null || arguments.length == 0 ? empty : Arrays.asList(arguments));
     }
 
     @Override
-    public final String execute(@Nonnull List<String> command) throws GMException, GMServiceException {
+    public final String execute(@Nonnull List<String> command) throws IOException, GMException, GMServiceException {
         if (command == null) throw new NullPointerException("Argument 'command' must not be null");
         if (command.size() == 0) throw new IllegalArgumentException("Argument 'command' must not be empty");
         return execute(null, command);
@@ -69,7 +69,8 @@ class BasicGMConnection implements GMConnection {
         process = null;
     }
 
-    protected String execute(String command, @Nonnull List<String> arguments) throws GMException, GMServiceException {
+    protected String execute(String command, @Nonnull List<String> arguments) throws IOException, GMException,
+            GMServiceException {
         if (process == null) throw new GMServiceException("GMConnection is already closed.");
         sendCommand(command, arguments);
         return readResult();
@@ -103,7 +104,7 @@ class BasicGMConnection implements GMConnection {
         }
     }
 
-    private String readResult() throws GMServiceException, GMException {
+    private String readResult() throws IOException, GMServiceException, GMException {
         String line;
         BufferedReader fromGm = process.getReader();
         sb.setLength(0);
@@ -112,7 +113,9 @@ class BasicGMConnection implements GMConnection {
                 return getGMOutput();
             }
             if (line.equals(Constants.GM_FAIL)) {
-                throw new GMException(getGMOutput());
+                final String output = getGMOutput();
+                if (output.endsWith("].")) throw new IOException(output);
+                else throw new GMException(output);
             }
             sb.append(line).append(EOL);
         }
@@ -121,6 +124,7 @@ class BasicGMConnection implements GMConnection {
     }
 
     private String getGMOutput() {
+        sb.setLength(sb.length() - EOL.length());
         String output = sb.toString();
         if (sb.length() > NORMAL_BUFFER_SIZE) {
             sb.setLength(0);
