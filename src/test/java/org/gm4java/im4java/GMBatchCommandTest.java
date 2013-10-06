@@ -30,12 +30,17 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
+
+import javax.imageio.ImageIO;
 
 /**
  * Test cases for {@link GMBatchCommand}.
@@ -160,5 +165,24 @@ public class GMBatchCommandTest {
         assertThat(iter.next(), is("600"));
         assertThat(iter.next(), is("800x600"));
         assertThat(iter.next(), is("0"));
+    }
+
+    @Test
+    public void run_handlesBufferedImageAsInput() throws Exception {
+        final String command = "convert";
+        sut = new GMBatchCommand(service, command);
+        BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/a.png"));
+        IMOperation op = new IMOperation();
+        op.addImage();                        // input
+        op.resize(80, 60);
+        op.addImage();                        // output
+
+        sut.run(op, image, TARGET_IMAGE);
+
+        @java.lang.SuppressWarnings("unchecked")
+        ArgumentCaptor<List<String>> captor = ArgumentCaptor.forClass((Class<List<String>>) (Class<?>) List.class);
+        verify(service).execute(captor.capture());
+        assertThat(captor.getValue(),
+                equalTo(Arrays.asList(command, captor.getValue().get(1), "-resize", "80x60", TARGET_IMAGE)));
     }
 }
