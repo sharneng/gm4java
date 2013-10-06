@@ -124,6 +124,19 @@ public abstract class AbstractGMConnectionTest {
     }
 
     @Test
+    public void execute_throwsIOException_whenGMreturnsIOError() throws Exception {
+        final String line1 = "error line 1";
+        final String line2 = "convert: Unable to open file (a.jpg) [No such file or directory].";
+        when(reader.readLine()).thenReturn(line1, line2, "NG");
+
+        exception.expect(IOException.class);
+        exception.expectMessage(line1);
+        exception.expectMessage(line2);
+
+        sut().execute(gmCommand);
+    }
+
+    @Test
     public void execute_throwsGMException_whenGMreturnsError() throws Exception {
         final String line1 = "error line 1";
         final String line2 = "line 2";
@@ -228,7 +241,7 @@ public abstract class AbstractGMConnectionTest {
 
         String result = sut().execute(gmCommand);
 
-        assertThat(result, is(line1 + TestUtils.EOL + line2 + TestUtils.EOL));
+        assertThat(result, is(line1 + TestUtils.EOL + line2));
     }
 
     @Test
@@ -238,7 +251,7 @@ public abstract class AbstractGMConnectionTest {
 
         String result = sut().execute(gmCommand);
 
-        assertThat(result, is(large + TestUtils.EOL));
+        assertThat(result, is(large));
     }
 
     @Test

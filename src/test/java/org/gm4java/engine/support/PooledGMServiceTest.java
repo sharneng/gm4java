@@ -54,7 +54,7 @@ public class PooledGMServiceTest {
     @Mock
     private PooledGMConnection connection;
 
-    private String gmCommand = "convert something";
+    private final String gmCommand = "convert something";
     private GMConnectionPoolConfig config;
 
     private PooledGMService sut;
@@ -245,4 +245,5 @@ public class PooledGMServiceTest {
 
         verify(pool).returnObject(connection);
     }
+
 }

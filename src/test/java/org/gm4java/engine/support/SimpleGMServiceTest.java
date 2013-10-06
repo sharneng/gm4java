@@ -47,6 +47,7 @@ public class SimpleGMServiceTest extends AbstractGMConnectionTest {
     private SimpleGMService sut;
     private GMConnection connection;
 
+    @Override
     @Before
     public void setup() throws Exception {
         super.setup();
@@ -74,7 +75,7 @@ public class SimpleGMServiceTest extends AbstractGMConnectionTest {
         String result = sut.execute(command);
 
         verify(mockWriter).write(command);
-        assertThat(result, is(expected + TestUtils.EOL));
+        assertThat(result, is(expected));
     }
 
     @Test
@@ -87,7 +88,7 @@ public class SimpleGMServiceTest extends AbstractGMConnectionTest {
         String result = sut.execute(Arrays.asList(command));
 
         verify(mockWriter).write(command);
-        assertThat(result, is(expected + TestUtils.EOL));
+        assertThat(result, is(expected));
     }
 
     @Test

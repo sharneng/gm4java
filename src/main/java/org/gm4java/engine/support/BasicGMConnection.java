@@ -40,6 +40,7 @@ class BasicGMConnection implements GMConnection {
     private static final List<String> empty = Arrays.asList(new String[0]);
     private static final int NORMAL_BUFFER_SIZE = 4096;
     private static final String EOL = System.getProperty("line.separator");
+    private static final int EOL_SIZE = EOL.length();
     private ReaderWriterProcess process;
     private final StringBuffer sb = new StringBuffer();
 
@@ -124,7 +125,8 @@ class BasicGMConnection implements GMConnection {
     }
 
     private String getGMOutput() {
-        sb.setLength(sb.length() - EOL.length());
+        int size = sb.length() - EOL_SIZE;
+        if (size > 0) sb.setLength(size);
         String output = sb.toString();
         if (sb.length() > NORMAL_BUFFER_SIZE) {
             sb.setLength(0);
