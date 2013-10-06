@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
  * 
  * This class wraps the GM command in interactive or batch mode.
  * <p>
- * Note: Does not support asynchronous mode; Does not support BufferedImage
+ * Note: Does not support asynchronous mode; Does not support BufferedImage as output.
  * 
  * @author Kenneth Xu
  * 
