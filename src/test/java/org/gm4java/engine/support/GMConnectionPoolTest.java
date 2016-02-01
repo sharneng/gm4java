@@ -21,6 +21,7 @@ import static org.mockito.Mockito.*;
 
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
+import org.apache.commons.pool.impl.GenericObjectPool;
 import org.gm4java.engine.GMServiceException;
 import org.junit.After;
 import org.junit.Before;
@@ -55,6 +56,8 @@ public class GMConnectionPoolTest {
     private ReaderWriterProcess process;
     @Mock
     private ReaderWriterProcess.Factory factory;
+    @Mock
+    private CommandSelector commandSelector;
 
     private String gmCommand = "convert something";
     private ReaderWriterProcess[] processes;
@@ -78,7 +81,8 @@ public class GMConnectionPoolTest {
             processes[i] = mock(ReaderWriterProcess.class);
         }
         when(factory.getProcess(Matchers.<String[]> anyVararg())).thenReturn(process);
-        sut = new GMConnectionPool(config);
+        when(commandSelector.gmCommand()).thenReturn(Constants.GM_COMMAND.clone());
+        sut = new GMConnectionPool(config, commandSelector);
         sut.setProcessFactory(factory);
     }
 
@@ -102,7 +106,18 @@ public class GMConnectionPoolTest {
         exception.expect(NullPointerException.class);
         exception.expectMessage("config");
 
-        new GMConnectionPool(null);
+        new GMConnectionPool(null, commandSelector);
+    }
+
+    @Test
+    @SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
+    public void constructor_chokes_onNullCommandSelector() throws Exception {
+        exception.expect(NullPointerException.class);
+        exception.expectMessage("commandselector");
+        config = mock(GMConnectionPoolConfig.class);
+        when(config.getConfig()).thenReturn(mock(GenericObjectPool.Config.class));
+
+        new GMConnectionPool(config, null);
     }
 
     @Test

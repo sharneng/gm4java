@@ -46,11 +46,15 @@ final class Constants {
         "-safe-mode", "on",
         "-"
     };
+    static final String[] GM_COMMAND_V1_3_22 = {
+            DEFAULT_GM_PATH, "batch",
+            "-escape", "windows",
+            "-feedback", "on",
+            "-pass", GM_PASS,
+            "-fail", GM_FAIL,
+            "-prompt", "off",
+            "-echo", "off",
+            "-"
+    };
     // @formatter:on
-
-    static String[] gmCommand(String gmPath) {
-        String[] result = GM_COMMAND.clone();
-        result[0] = gmPath;
-        return result;
-    }
 }
