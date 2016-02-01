@@ -48,7 +48,7 @@ public class CommandSelector {
      * Retrieve gm base command set correctly according to implementation
      *
      * As of version 1.3.22 , the keyword '-safe-mode' is removed from GraphicsMagick.
-     * We cache the response from "gm version" to check what version you have installed.
+     * We cache the response from "gm version" to check which version you have installed.
      *
      * http://hg.graphicsmagick.org/hg/GraphicsMagick/diff/0c27524abb7d/magick/command.c#l1.328
      * https://github.com/sharneng/gm4java/issues/9
