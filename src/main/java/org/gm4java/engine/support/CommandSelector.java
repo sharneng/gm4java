@@ -35,7 +35,7 @@ public class CommandSelector {
     private String gmPath;
     private Boolean isVersionEqualOrGreaterThan_1_3_22;
 
-    protected CommandSelector(String gmPath) {
+    public CommandSelector(String gmPath) {
         this(gmPath, new Shell());
     }
 
