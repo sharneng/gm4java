@@ -42,6 +42,17 @@ public class PooledGMService implements GMService {
      * @param config
      *            configuration of the GraphicsMagick process pool
      */
+    public PooledGMService(@Nonnull GMConnectionPoolConfig config) {
+        pool = new GMConnectionPool(config, new CommandSelector(config.getGMPath()));
+    }
+    
+    /**
+     * Construct a new instance of {@linkplain PooledGMService} with given pool configuration.
+     * 
+     * @param config
+     *            configuration of the GraphicsMagick process pool
+     * @param gmPath gm binary
+     */
     public PooledGMService(@Nonnull GMConnectionPoolConfig config, CommandSelector commandSelector) {
         pool = new GMConnectionPool(config, commandSelector);
     }
