@@ -21,10 +21,8 @@ import static org.junit.Assert.fail;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -36,6 +34,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMConnection;
 import org.gm4java.engine.GMServiceException;
+import org.gm4java.engine.support.TestUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
