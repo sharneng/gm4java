@@ -1,7 +1,10 @@
 package org.gm4java.engine.support;
 
-import org.apache.commons.pool.BasePoolableObjectFactory;
-import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.commons.pool2.BasePooledObjectFactory;
+import org.apache.commons.pool2.PooledObject;
+import org.apache.commons.pool2.impl.DefaultPooledObject;
+import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.gm4java.engine.GMServiceException;
 
 import java.io.IOException;
@@ -20,7 +23,7 @@ class GMConnectionPool extends GenericObjectPool<PooledGMConnection> {
 
     private String[] gmCommand = Constants.gmCommand(GMConnectionPoolConfig.DEFAULT_GM_PATH);
     private int evictAfterNumberOfUse = GMConnectionPoolConfig.DEFAULT_EVICT_AFTER_NUMBER_OF_USE;
-
+    
     /**
      * Construct a new instance of {@linkplain GMConnectionPool}.
      */
@@ -35,7 +38,7 @@ class GMConnectionPool extends GenericObjectPool<PooledGMConnection> {
         setGMPath(config.getGMPath());
     }
 
-    private static GenericObjectPool.Config notNull(GMConnectionPoolConfig config) {
+    private static GenericObjectPoolConfig notNull(GMConnectionPoolConfig config) {
         if (config == null) throw new NullPointerException("config");
         return config.getConfig();
     }
@@ -59,26 +62,6 @@ class GMConnectionPool extends GenericObjectPool<PooledGMConnection> {
             throw new GMServiceException(e.getMessage(), e);
         }
     }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * This implementation delegates to super class but ensures that there is no other checked exception except
-     * {@link GMServiceException} will be thrown.
-     * 
-     */
-    @Override
-    public void returnObject(@Nonnull PooledGMConnection connection) throws GMServiceException {
-        try {
-            super.returnObject(connection);
-        } catch (GMServiceException e) {
-            throw e;
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new GMServiceException(e.getMessage(), e);
-        }
-    };
 
     /**
      * Gets the path to GraphicsMagick executable set by {@link #setGMPath(String)} or
@@ -140,23 +123,29 @@ class GMConnectionPool extends GenericObjectPool<PooledGMConnection> {
         }
     }
 
-    private static final class Factory extends BasePoolableObjectFactory<PooledGMConnection> {
+    private static final class Factory extends BasePooledObjectFactory<PooledGMConnection> {
 
         private GMConnectionPool pool;
-
-        @Override
-        public PooledGMConnection makeObject() throws GMServiceException {
+        
+		@Override
+		public PooledGMConnection create() throws Exception {
             return new PooledGMConnection(pool);
+		}
+
+		@Override
+		public PooledObject<PooledGMConnection> wrap(PooledGMConnection connection) {
+			return new DefaultPooledObject<PooledGMConnection>(connection);
+		}
+
+        @Override
+        public void destroyObject(PooledObject<PooledGMConnection> pooledObject) throws GMServiceException {
+            pooledObject.getObject().close();
         }
 
         @Override
-        public void destroyObject(PooledGMConnection connection) throws GMServiceException {
-            connection.close();
-        }
-
-        @Override
-        public boolean validateObject(PooledGMConnection connection) {
+        public boolean validateObject(PooledObject<PooledGMConnection> pooledObject) {
             try {
+            	PooledGMConnection connection = pooledObject.getObject();
                 connection.execute("ping");
                 return true;
             } catch (Exception e) {
@@ -165,13 +154,15 @@ class GMConnectionPool extends GenericObjectPool<PooledGMConnection> {
         }
 
         @Override
-        public void activateObject(PooledGMConnection connection) throws GMServiceException {
-            connection.ensureHealthy();
+        public void activateObject(PooledObject<PooledGMConnection> pooledObject) throws GMServiceException {
+        	pooledObject.getObject().ensureHealthy();
         }
 
         @Override
-        public void passivateObject(PooledGMConnection connection) throws GMServiceException {
-            connection.ensureHealthy();
+        public void passivateObject(PooledObject<PooledGMConnection> pooledObject) throws GMServiceException {
+        	pooledObject.getObject().ensureHealthy();
         }
+
+
     }
 }

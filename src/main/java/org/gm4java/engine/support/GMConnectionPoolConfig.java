@@ -15,7 +15,7 @@
  */
 package org.gm4java.engine.support;
 
-import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 // SUPPRESS CHECKSTYLE UnusedImport BECAUSE it is used in javadoc.
 import org.gm4java.engine.GMConnection;
 
@@ -126,12 +126,19 @@ public class GMConnectionPoolConfig {
      * evicted from pool.
      */
     public static final int DEFAULT_EVICT_AFTER_NUMBER_OF_USE = 0;
+    
+    /**
+     * Default value for the action to take when the connection pool is exhausted.
+     */
+    public static final WhenExhaustedAction DEFAULT_WHEN_EXHAUSTED_ACTION = WhenExhaustedAction.BLOCK;
 
-    private GenericObjectPool.Config config = new GenericObjectPool.Config();
+    private GenericObjectPoolConfig config = new GenericObjectPoolConfig();
 
     private String gmPath = DEFAULT_GM_PATH;
 
     private int evictAfterNumberOfUse = DEFAULT_EVICT_AFTER_NUMBER_OF_USE;
+    
+    private WhenExhaustedAction whenExhaustedAction = DEFAULT_WHEN_EXHAUSTED_ACTION;
 
     /**
      * Returns the maximum number of {@link GMConnection}s that can be allocated by the pool (checked out to clients, or
@@ -142,7 +149,7 @@ public class GMConnectionPoolConfig {
      * @see #setMaxActive
      */
     public int getMaxActive() {
-        return config.maxActive;
+        return config.getMaxTotal();
     }
 
     /**
@@ -155,7 +162,7 @@ public class GMConnectionPoolConfig {
      * @see #getMaxActive
      */
     public void setMaxActive(int maxActive) {
-        config.maxActive = maxActive;
+        config.setMaxTotal(maxActive);
     }
 
     /**
@@ -166,19 +173,54 @@ public class GMConnectionPoolConfig {
      * @see #setWhenExhaustedAction
      */
     public WhenExhaustedAction getWhenExhaustedAction() {
-        return WhenExhaustedAction.fromValue(config.whenExhaustedAction);
+        return whenExhaustedAction;
     }
 
-    /**
-     * Sets the action to take when the {@link PooledGMService#getConnection()} method is invoked when the pool is
-     * exhausted (the maximum number of "active" {@link GMConnection}s has been reached).
-     * 
-     * @param whenExhaustedAction
-     *            the action to set
-     * @see #getWhenExhaustedAction
-     */
+	/**
+	 * Sets the action to take when the {@link PooledGMService#getConnection()}
+	 * method is invoked when the pool is exhausted (the maximum number of
+	 * "active" {@link GMConnection}s has been reached).
+	 * 
+	 * <ul>
+	 * <li>When {@link #setWhenExhaustedAction <i>whenExhaustedAction</i>} is
+	 * {@link WhenExhaustedAction#FAIL}, {@link PooledGMService#getConnection()}
+	 * will throw a {@link NoSuchElementException}</li>
+	 * <li>When {@link #setWhenExhaustedAction <i>whenExhaustedAction</i>} is
+	 * {@link WhenExhaustedAction#GROW}, {@link PooledGMService#getConnection()}
+	 * will create a new GM connection and return it. <i>This overrides
+	 * {@link #setMaxActive <i>maxActive</i>} since it will be meaningless.</i>
+	 * </li>
+	 * <li>When {@link #setWhenExhaustedAction <i>whenExhaustedAction</i>} is
+	 * {@link WhenExhaustedAction#BLOCK},
+	 * {@link PooledGMService#getConnection()} will block (invoke
+	 * {@link Object#wait()}) until a new or idle GM connection is available. If
+	 * a positive {@link #setMaxWait <i>maxWait</i>} value is supplied, then
+	 * {@link PooledGMService#getConnection()} will block for at most that many
+	 * milliseconds, after which a {@link NoSuchElementException} will be
+	 * thrown. If {@link #setMaxWait <i>maxWait</i>} is non-positive, the
+	 * {@link PooledGMService#getConnection()} method will block indefinitely.
+	 * </li>
+	 * </ul>
+	 * 
+	 * @param whenExhaustedAction
+	 *            the action to set
+	 * @see #getWhenExhaustedAction
+	 */
     public void setWhenExhaustedAction(WhenExhaustedAction whenExhaustedAction) {
-        config.whenExhaustedAction = whenExhaustedAction.toValue();
+		this.whenExhaustedAction = whenExhaustedAction;
+
+		switch (whenExhaustedAction) {
+		case BLOCK:
+			config.setBlockWhenExhausted(true);
+			break;
+		case FAIL:
+			config.setBlockWhenExhausted(false);
+			break;
+		case GROW:
+			config.setBlockWhenExhausted(false);
+			setMaxActive(-1);
+			break;
+		}
     }
 
     /**
@@ -193,7 +235,7 @@ public class GMConnectionPoolConfig {
      * @see #setWhenExhaustedAction
      */
     public long getMaxWait() {
-        return config.maxWait;
+        return config.getMaxWaitMillis();
     }
 
     /**
@@ -209,7 +251,7 @@ public class GMConnectionPoolConfig {
      * @see #setWhenExhaustedAction
      */
     public void setMaxWait(long maxWait) {
-        config.maxWait = maxWait;
+        config.setMaxWaitMillis(maxWait);
     }
 
     /**
@@ -219,7 +261,7 @@ public class GMConnectionPoolConfig {
      * @see #setMaxIdle
      */
     public int getMaxIdle() {
-        return config.maxIdle;
+        return config.getMaxIdle();
     }
 
     /**
@@ -235,7 +277,7 @@ public class GMConnectionPoolConfig {
      * @see #getMaxIdle
      */
     public void setMaxIdle(int maxIdle) {
-        config.maxIdle = maxIdle;
+        config.setMaxIdle(maxIdle);
     }
 
     /**
@@ -250,7 +292,7 @@ public class GMConnectionPoolConfig {
      * @see #getTimeBetweenEvictionRunsMillis()
      */
     public void setMinIdle(int minIdle) {
-        config.minIdle = minIdle;
+        config.setMinIdle(minIdle);
     }
 
     /**
@@ -262,7 +304,7 @@ public class GMConnectionPoolConfig {
      * @see #setMinIdle
      */
     public int getMinIdle() {
-        return config.minIdle;
+        return config.getMinIdle();
     }
 
     /**
@@ -274,7 +316,7 @@ public class GMConnectionPoolConfig {
      * @see #setTestOnGet
      */
     public boolean getTestOnGet() {
-        return config.testOnBorrow;
+        return config.getTestOnBorrow();
     }
 
     /**
@@ -287,7 +329,7 @@ public class GMConnectionPoolConfig {
      * @see #getTestOnGet
      */
     public void setTestOnGet(boolean testOnGet) {
-        config.testOnBorrow = testOnGet;
+        config.setTestOnBorrow(testOnGet);
     }
 
     /**
@@ -298,7 +340,7 @@ public class GMConnectionPoolConfig {
      * @see #setTestOnReturn
      */
     public boolean getTestOnReturn() {
-        return config.testOnReturn;
+        return config.getTestOnReturn();
     }
 
     /**
@@ -310,7 +352,7 @@ public class GMConnectionPoolConfig {
      * @see #getTestOnReturn
      */
     public void setTestOnReturn(boolean testOnReturn) {
-        config.testOnReturn = testOnReturn;
+        config.setTestOnReturn(testOnReturn);
     }
 
     /**
@@ -321,7 +363,7 @@ public class GMConnectionPoolConfig {
      * @see #setTimeBetweenEvictionRunsMillis
      */
     public long getTimeBetweenEvictionRunsMillis() {
-        return config.timeBetweenEvictionRunsMillis;
+        return config.getTimeBetweenEvictionRunsMillis();
     }
 
     /**
@@ -333,7 +375,7 @@ public class GMConnectionPoolConfig {
      * @see #getTimeBetweenEvictionRunsMillis
      */
     public void setTimeBetweenEvictionRunsMillis(long timeBetweenEvictionRunsMillis) {
-        config.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
+        config.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
     }
 
     /**
@@ -345,7 +387,7 @@ public class GMConnectionPoolConfig {
      * @see #setTimeBetweenEvictionRunsMillis
      */
     public int getNumTestsPerEvictionRun() {
-        return config.numTestsPerEvictionRun;
+        return config.getNumTestsPerEvictionRun();
     }
 
     /**
@@ -363,7 +405,7 @@ public class GMConnectionPoolConfig {
      * @see #setTimeBetweenEvictionRunsMillis
      */
     public void setNumTestsPerEvictionRun(int numTestsPerEvictionRun) {
-        config.numTestsPerEvictionRun = numTestsPerEvictionRun;
+        config.setNumTestsPerEvictionRun(numTestsPerEvictionRun);
     }
 
     /**
@@ -376,7 +418,7 @@ public class GMConnectionPoolConfig {
      * @see #setTimeBetweenEvictionRunsMillis
      */
     public long getMinEvictableIdleTimeMillis() {
-        return config.minEvictableIdleTimeMillis;
+        return config.getMinEvictableIdleTimeMillis();
     }
 
     /**
@@ -391,7 +433,7 @@ public class GMConnectionPoolConfig {
      * @see #setTimeBetweenEvictionRunsMillis
      */
     public void setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
-        config.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
+        config.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
     }
 
     /**
@@ -404,7 +446,7 @@ public class GMConnectionPoolConfig {
      * @see #setSoftMinEvictableIdleTimeMillis
      */
     public long getSoftMinEvictableIdleTimeMillis() {
-        return config.softMinEvictableIdleTimeMillis;
+        return config.getSoftMinEvictableIdleTimeMillis();
     }
 
     /**
@@ -419,7 +461,7 @@ public class GMConnectionPoolConfig {
      * @see #getSoftMinEvictableIdleTimeMillis
      */
     public void setSoftMinEvictableIdleTimeMillis(long softMinEvictableIdleTimeMillis) {
-        config.softMinEvictableIdleTimeMillis = softMinEvictableIdleTimeMillis;
+        config.setSoftMinEvictableIdleTimeMillis(softMinEvictableIdleTimeMillis);
     }
 
     /**
@@ -432,7 +474,7 @@ public class GMConnectionPoolConfig {
      * @see #setTimeBetweenEvictionRunsMillis
      */
     public boolean getTestWhileIdle() {
-        return config.testWhileIdle;
+        return config.getTestWhileIdle();
     }
 
     /**
@@ -446,7 +488,7 @@ public class GMConnectionPoolConfig {
      * @see #setTimeBetweenEvictionRunsMillis
      */
     public void setTestWhileIdle(boolean testWhileIdle) {
-        config.testWhileIdle = testWhileIdle;
+        config.setTestWhileIdle(testWhileIdle);
     }
 
     /**
@@ -458,7 +500,7 @@ public class GMConnectionPoolConfig {
      * @return {@code true} if the pool is configured to act as a LIFO queue
      */
     public boolean isLifo() {
-        return config.lifo;
+        return config.getLifo();
     }
 
     /**
@@ -471,7 +513,7 @@ public class GMConnectionPoolConfig {
      *            the new value for the LIFO property
      */
     public void setLifo(boolean lifo) {
-        config.lifo = lifo;
+        config.setLifo(lifo);
     }
 
     /**
@@ -522,7 +564,7 @@ public class GMConnectionPoolConfig {
         this.evictAfterNumberOfUse = evictAfterNumberOfUse;
     }
 
-    GenericObjectPool.Config getConfig() {
+    GenericObjectPoolConfig getConfig() {
         return config;
     }
 }
