@@ -43,7 +43,6 @@ final class Constants {
         "-fail", GM_FAIL,
         "-prompt", "off",
         "-echo", "off",
-        "-safe-mode", "on",
         "-"
     };
     // @formatter:on
