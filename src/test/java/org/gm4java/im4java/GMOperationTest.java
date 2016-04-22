@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.UUID;
 
 public class GMOperationTest {
@@ -174,6 +175,13 @@ public class GMOperationTest {
     public void rotate_Annotation_HeightLargerThanWidth() {
         sut.rotate(90.0, RotationAnnotation.HeightExceedsWidthOnly);
         assertThat(sut.getCmdArgs(), hasItem("90.0<"));
+    }
+
+    @Test
+    public void rotate_GM_Understands_English_Locale_Only() {
+        Locale.setDefault(Locale.FRENCH);
+        sut.rotate(-90.0, RotationAnnotation.WidthExceedsHeightOnly);
+        assertThat(sut.getCmdArgs(), hasItem("-90.0>"));
     }
 
     @Test
