@@ -6,7 +6,6 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -40,7 +39,7 @@ public class CommandSelectorTest {
         String fakeInput = "GraphicsMagick 1.3.22 2015-11-07 Q16 http://www.GraphicsMagick.org/\n" +
                 "Copyright (C) 2002-2015 GraphicsMagick Group.";
 
-        InputStream inputStream = new ByteArrayInputStream(fakeInput.getBytes(StandardCharsets.UTF_8));
+        InputStream inputStream = new ByteArrayInputStream(fakeInput.getBytes("UTF-8"));
 
         when(shell.exec(new String[] {GM_BASE_COMMAND, "version"})
         ).thenReturn(process);
@@ -70,7 +69,7 @@ public class CommandSelectorTest {
         String fakeInput = "GraphicsMagick 1.3.21 20??-??-?? ??? http://www.GraphicsMagick.org/\n" +
                 "Copyright (C) 2002-20?? GraphicsMagick Group.";
 
-        InputStream inputStream = new ByteArrayInputStream(fakeInput.getBytes(StandardCharsets.UTF_8));
+        InputStream inputStream = new ByteArrayInputStream(fakeInput.getBytes("UTF-8"));
 
         when(shell.exec(isA(String[].class))
         ).thenReturn(process);
@@ -101,7 +100,7 @@ public class CommandSelectorTest {
         String fakeInput = "GraphicsMagick 1.3.22 2015-11-07 Q16 http://www.GraphicsMagick.org/\n" +
                 "Copyright (C) 2002-2015 GraphicsMagick Group.";
 
-        InputStream inputStream = new ByteArrayInputStream(fakeInput.getBytes(StandardCharsets.UTF_8));
+        InputStream inputStream = new ByteArrayInputStream(fakeInput.getBytes("UTF-8"));
 
         when(shell.exec(new String[] {GM_BASE_COMMAND, "version"})
         ).thenReturn(process);
@@ -131,7 +130,7 @@ public class CommandSelectorTest {
 
         String fakeInput = "";
 
-        InputStream inputStream = new ByteArrayInputStream(fakeInput.getBytes(StandardCharsets.UTF_8));
+        InputStream inputStream = new ByteArrayInputStream(fakeInput.getBytes("UTF-8"));
 
         when(shell.exec(new String[] {GM_BASE_COMMAND, "version"})
         ).thenReturn(process);
