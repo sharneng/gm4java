@@ -15,15 +15,26 @@
  */
 package org.gm4java.engine.support;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.fail;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
+import org.apache.commons.pool.impl.GenericObjectPool;
 import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMConnection;
 import org.gm4java.engine.GMServiceException;
+import org.gm4java.engine.support.TestUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,7 +46,6 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.Assert;
 
 /**
  * Test cases for {@link PooledGMService}.
@@ -53,6 +63,8 @@ public class PooledGMServiceTest {
     private GMConnectionPool pool;
     @Mock
     private PooledGMConnection connection;
+    @Mock
+    private CommandSelector commandSelector;
 
     private final String gmCommand = "convert something";
     private GMConnectionPoolConfig config;
@@ -73,7 +85,19 @@ public class PooledGMServiceTest {
         exception.expectMessage("config");
         config = null;
 
-        new PooledGMService(config);
+        new PooledGMService(config, commandSelector);
+    }
+
+    @Test
+    @SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
+    public void constructor_chokes_onNullCommandSelector() throws Exception {
+        exception.expect(NullPointerException.class);
+        exception.expectMessage("commandselector");
+        config = mock(GMConnectionPoolConfig.class);
+        when(config.getConfig()).thenReturn(mock(GenericObjectPool.Config.class));
+        commandSelector = null;
+
+        new PooledGMService(config, commandSelector);
     }
 
     @Test
@@ -81,7 +105,12 @@ public class PooledGMServiceTest {
         config = new GMConnectionPoolConfig();
         final String expectedGMPath = PATH_TO_GM;
         config.setGMPath(expectedGMPath);
-        sut = new PooledGMService(config);
+
+        when(commandSelector.isVersionEqualOrGratherThan_1_3_22(anyString())).thenReturn(true);
+        when(commandSelector.gmCommand()).thenCallRealMethod();
+        when(commandSelector.setGmPath(anyString())).thenCallRealMethod();
+
+        sut = new PooledGMService(config, commandSelector);
         ReaderWriterProcess.Factory factory = mock(ReaderWriterProcess.Factory.class);
         ReaderWriterProcess process = mock(ReaderWriterProcess.class);
         sut.setProcessFactory(factory);
@@ -90,6 +119,11 @@ public class PooledGMServiceTest {
         sut.getConnection();
 
         TestUtils.verifyFactoryCalledWithGMPath(factory, expectedGMPath);
+
+        verify(commandSelector).isVersionEqualOrGratherThan_1_3_22(eq(expectedGMPath));
+        verify(commandSelector).gmCommand();
+        verify(commandSelector).setGmPath(expectedGMPath);
+        verifyNoMoreInteractions(commandSelector);
     }
 
     @Test
@@ -224,7 +258,7 @@ public class PooledGMServiceTest {
         when(connection.execute(gmCommand)).thenThrow(new GMException(""));
         try {
             sut.execute(gmCommand);
-            Assert.fail("shoud get exeception here.");
+            fail("shoud get exeception here.");
             // SUPPRESS CHECKSTYLE EmptyBlock BECAUSE test
         } catch (GMException e) {
         }
@@ -238,7 +272,7 @@ public class PooledGMServiceTest {
         when(connection.execute(command)).thenThrow(new GMException(""));
         try {
             sut.execute(command);
-            Assert.fail("shoud get exeception here.");
+            fail("shoud get exeception here.");
             // SUPPRESS CHECKSTYLE EmptyBlock BECAUSE test
         } catch (GMException e) {
         }

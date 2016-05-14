@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import javax.annotation.CheckForNull;
 
@@ -227,7 +228,7 @@ public class GMOperation extends org.im4java.core.GMOperation {
         }
         final List<String> args = getCmdArgs();
         args.add("-rotate");
-        args.add(String.format("%.1f%s", degrees, annotation.asAnnotation()));
+        args.add(String.format(Locale.ENGLISH,"%.1f%s", degrees, annotation.asAnnotation()));
         return this;
     }
 
@@ -312,7 +313,7 @@ public class GMOperation extends org.im4java.core.GMOperation {
         if (isBlank(text)) {
             throw new IllegalArgumentException("Text string must be defined");
         }
-        draw(String.format("text %d %d '%s'", offsetX, offsetY, text));
+        draw(String.format(Locale.ENGLISH,"text %d %d '%s'", offsetX, offsetY, text));
         return this;
     }
 

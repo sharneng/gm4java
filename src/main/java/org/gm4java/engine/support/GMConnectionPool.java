@@ -18,26 +18,32 @@ import javax.annotation.Nonnull;
 class GMConnectionPool extends GenericObjectPool<PooledGMConnection> {
     private ReaderWriterProcess.Factory factory = ReaderWriterProcessImpl.FACTORY;
 
-    private String[] gmCommand = Constants.gmCommand(GMConnectionPoolConfig.DEFAULT_GM_PATH);
+    private String[] gmCommand;
     private int evictAfterNumberOfUse = GMConnectionPoolConfig.DEFAULT_EVICT_AFTER_NUMBER_OF_USE;
 
     /**
      * Construct a new instance of {@linkplain GMConnectionPool}.
      */
-    public GMConnectionPool(@Nonnull GMConnectionPoolConfig config) {
-        this(new Factory(), config);
+    public GMConnectionPool(@Nonnull GMConnectionPoolConfig config, @Nonnull CommandSelector commandSelector) {
+        this(new Factory(), config, commandSelector);
     }
 
-    private GMConnectionPool(Factory factory, GMConnectionPoolConfig config) {
+    protected GMConnectionPool(Factory factory, GMConnectionPoolConfig config, CommandSelector commandSelector) {
         super(factory, notNull(config));
         factory.pool = this;
         evictAfterNumberOfUse = config.getEvictAfterNumberOfUse();
-        setGMPath(config.getGMPath());
+
+        notNull(commandSelector).setGmPath(config.getGMPath());
+        this.gmCommand = commandSelector.gmCommand();
     }
 
     private static GenericObjectPool.Config notNull(GMConnectionPoolConfig config) {
         if (config == null) throw new NullPointerException("config");
         return config.getConfig();
+    }
+    private static CommandSelector notNull(CommandSelector commandSelector) {
+        if (commandSelector == null) throw new NullPointerException("commandselector");
+        return commandSelector;
     }
 
     /**

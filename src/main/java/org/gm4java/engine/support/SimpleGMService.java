@@ -40,7 +40,11 @@ public class SimpleGMService implements GMService {
     public static final String DEFAULT_GM_PATH = Constants.DEFAULT_GM_PATH;
 
     private ReaderWriterProcess.Factory factory = ReaderWriterProcessImpl.FACTORY;
-    private final String[] gmCommand = Constants.gmCommand(DEFAULT_GM_PATH);
+    private final String[] gmCommand;
+
+    public SimpleGMService() {
+        this.gmCommand = new CommandSelector(DEFAULT_GM_PATH).gmCommand();
+    }
 
     /**
      * Gets the path to GraphicsMagick executable set by {@link #setGMPath(String)} or {@link #DEFAULT_GM_PATH} if it
