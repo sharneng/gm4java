@@ -15,8 +15,6 @@
  */
 package org.gm4java.engine.support;
 
-//import static org.hamcrest.MatcherAssert.*;
-//import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
@@ -26,7 +24,10 @@ import org.gm4java.engine.GMConnection;
 import org.gm4java.engine.GMServiceException;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 
@@ -40,18 +41,28 @@ public class PooledGMConnectionTest extends AbstractGMConnectionTest {
     private static final String READER_WRITER_PROCESS_FAILURE = "Something bad happended";
 
     @Mock
-    private ReaderWriterProcess.Factory factory;
+    private GMProcessFactory.Builder builder;
     @Mock
     private GMConnectionPool pool;
 
     private PooledGMConnection sut;
 
-    private String gmCommand = "convert something";
+    private final String gmCommand = "convert something";
 
+    @Override
     @Before
     public void setup() throws Exception {
         super.setup();
-        pool.setProcessFactory(factory);
+        final ArgumentCaptor<String> gmPathCaptor = ArgumentCaptor.forClass(String.class);
+        when(builder.buildFactory(gmPathCaptor.capture())).thenReturn(factory);
+        when(factory.getProcess()).thenReturn(process);
+        when(factory.getGMPath()).then(new Answer<String>() {
+            @Override
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                return gmPathCaptor.getValue();
+            }
+        });
+        pool.setProcessFactoryBuilder(builder);
         when(pool.createProcess()).thenReturn(process);
         sut = new PooledGMConnection(pool);
     }
@@ -127,6 +138,32 @@ public class PooledGMConnectionTest extends AbstractGMConnectionTest {
         } catch (GMException e) {
         }
 
+        sut.ensureHealthy();
+    }
+
+    @Test
+    public void ensureHealthy_happyDay_whenRuntimeExceptionWasThrown() throws Exception {
+        when(reader.readLine()).thenThrow(new RuntimeException());
+        try {
+            sut.execute(gmCommand);
+            // SUPPRESS CHECKSTYLE EmptyBlock BECAUSE test
+        } catch (RuntimeException e) {
+        }
+
+        exception.expect(GMServiceException.class);
+        sut.ensureHealthy();
+    }
+
+    @Test
+    public void ensureHealthy_happyDay_whenErrorWasThrown() throws Exception {
+        when(reader.readLine()).thenThrow(new Error());
+        try {
+            sut.execute(gmCommand);
+            // SUPPRESS CHECKSTYLE EmptyBlock BECAUSE test
+        } catch (Error e) {
+        }
+
+        exception.expect(GMServiceException.class);
         sut.ensureHealthy();
     }
 

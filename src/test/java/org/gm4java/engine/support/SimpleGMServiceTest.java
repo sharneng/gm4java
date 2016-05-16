@@ -15,20 +15,23 @@
  */
 package org.gm4java.engine.support;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
-import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMConnection;
+import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMServiceException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -42,7 +45,7 @@ import java.util.Arrays;
 public class SimpleGMServiceTest extends AbstractGMConnectionTest {
     private static final String CREATE_PROCESS_FAILURE = "Something bad happended";
     @Mock
-    private ReaderWriterProcess.Factory factory;
+    private GMProcessFactory.Builder builder;
 
     private SimpleGMService sut;
     private GMConnection connection;
@@ -51,14 +54,21 @@ public class SimpleGMServiceTest extends AbstractGMConnectionTest {
     @Before
     public void setup() throws Exception {
         super.setup();
-        when(factory.getProcess(Matchers.<String[]> anyVararg())).thenReturn(process);
-        sut = new SimpleGMService();
-        sut.setProcessFactory(factory);
+        final ArgumentCaptor<String> gmPathCaptor = ArgumentCaptor.forClass(String.class);
+        when(builder.buildFactory(gmPathCaptor.capture())).thenReturn(factory);
+        when(factory.getProcess()).thenReturn(process);
+        when(factory.getGMPath()).then(new Answer<String>() {
+            @Override
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                return gmPathCaptor.getValue();
+            }
+        });
+        sut = new SimpleGMService(builder);
     }
 
     @Test
     public void getConnection_chokes_whenFactoryFailes() throws Exception {
-        when(factory.getProcess(Matchers.<String> anyVararg())).thenThrow(new IOException(CREATE_PROCESS_FAILURE));
+        when(factory.getProcess()).thenThrow(new IOException(CREATE_PROCESS_FAILURE));
         exception.expect(GMServiceException.class);
         exception.expectMessage(CREATE_PROCESS_FAILURE);
 
@@ -170,7 +180,8 @@ public class SimpleGMServiceTest extends AbstractGMConnectionTest {
         sut.getConnection();
 
         assertThat(sut.getGMPath(), is(expectedPath));
-        TestUtils.verifyFactoryCalledWithGMPath(factory, expectedPath);
+        verify(builder).buildFactory(expectedPath);
+        // TestUtils.verifyFactoryCalledWithGMPath(factory, expectedPath);
     }
 
     @Override

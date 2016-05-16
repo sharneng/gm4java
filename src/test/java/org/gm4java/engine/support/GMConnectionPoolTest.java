@@ -21,16 +21,17 @@ import static org.mockito.Mockito.*;
 
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
-import org.apache.commons.pool.impl.GenericObjectPool;
 import org.gm4java.engine.GMServiceException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.Matchers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,7 +45,6 @@ import java.io.Writer;
  */
 public class GMConnectionPoolTest {
     private static final String READER_WRITER_PROCESS_FAILURE = "Something bad happended";
-    private static final int MOCK_PROCESS_ARRAY_SIZE = 3;
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
@@ -55,49 +55,39 @@ public class GMConnectionPoolTest {
     @Mock
     private ReaderWriterProcess process;
     @Mock
-    private ReaderWriterProcess.Factory factory;
+    private GMProcessFactory factory;
     @Mock
-    private CommandSelector commandSelector;
+    private GMProcessFactory.Builder builder;
 
-    private String gmCommand = "convert something";
-    private ReaderWriterProcess[] processes;
-    private int processIndex;
+    private final String gmCommand = "convert something";
     private GMConnectionPoolConfig config;
-    private String[] capturedCommand;
 
     private GMConnectionPool sut;
 
     @Before
     public void setup() throws Exception {
         config = new GMConnectionPoolConfig();
-        processIndex = 0;
-        processes = new ReaderWriterProcess[MOCK_PROCESS_ARRAY_SIZE];
 
         MockitoAnnotations.initMocks(this);
         when(reader.readLine()).thenReturn("OK");
         when(process.getWriter()).thenReturn(writer);
         when(process.getReader()).thenReturn(reader);
-        for (int i = 0; i < MOCK_PROCESS_ARRAY_SIZE; i++) {
-            processes[i] = mock(ReaderWriterProcess.class);
-        }
-        when(factory.getProcess(Matchers.<String[]> anyVararg())).thenReturn(process);
-        when(commandSelector.gmCommand()).thenReturn(Constants.GM_COMMAND.clone());
-        sut = new GMConnectionPool(config, commandSelector);
-        sut.setProcessFactory(factory);
+        final ArgumentCaptor<String> gmPathCaptor = ArgumentCaptor.forClass(String.class);
+        when(builder.buildFactory(gmPathCaptor.capture())).thenReturn(factory);
+        when(factory.getProcess()).thenReturn(process);
+        when(factory.getGMPath()).then(new Answer<String>() {
+            @Override
+            public String answer(InvocationOnMock invocation) throws Throwable {
+                return gmPathCaptor.getValue();
+            }
+        });
+        sut = new GMConnectionPool(config);
+        sut.setProcessFactoryBuilder(builder);
     }
 
     @After
     public void teardown() throws Exception {
         sut.close();
-    }
-
-    private class MockFactory implements ReaderWriterProcess.Factory {
-        @Override
-        public ReaderWriterProcess getProcess(String... command) throws IOException {
-            capturedCommand = command;
-            if (processes[processIndex] == null) throw new IOException(READER_WRITER_PROCESS_FAILURE);
-            return processes[processIndex++];
-        }
     }
 
     @Test
@@ -106,24 +96,12 @@ public class GMConnectionPoolTest {
         exception.expect(NullPointerException.class);
         exception.expectMessage("config");
 
-        new GMConnectionPool(null, commandSelector);
-    }
-
-    @Test
-    @SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
-    public void constructor_chokes_onNullCommandSelector() throws Exception {
-        exception.expect(NullPointerException.class);
-        exception.expectMessage("commandselector");
-        config = mock(GMConnectionPoolConfig.class);
-        when(config.getConfig()).thenReturn(mock(GenericObjectPool.Config.class));
-
-        new GMConnectionPool(config, null);
+        new GMConnectionPool(null);
     }
 
     @Test
     public void borrowObject_chokes_whenCreateReaderWriterFails() throws Exception {
-        when(factory.getProcess(Matchers.<String[]> anyVararg())).thenThrow(
-                new IOException(READER_WRITER_PROCESS_FAILURE));
+        when(factory.getProcess()).thenThrow(new IOException(READER_WRITER_PROCESS_FAILURE));
 
         exception.expect(GMServiceException.class);
         exception.expectMessage(READER_WRITER_PROCESS_FAILURE);
@@ -133,8 +111,7 @@ public class GMConnectionPoolTest {
 
     @Test
     public void borrowObject_propagatesRuntimeException() throws Exception {
-        when(factory.getProcess((String[]) anyVararg())).thenThrow(
-                new NullPointerException(READER_WRITER_PROCESS_FAILURE));
+        when(factory.getProcess()).thenThrow(new NullPointerException(READER_WRITER_PROCESS_FAILURE));
 
         exception.expect(NullPointerException.class);
         exception.expectMessage(READER_WRITER_PROCESS_FAILURE);
@@ -233,28 +210,41 @@ public class GMConnectionPoolTest {
 
     @Test
     public void setGMPath_changesCommandSendtoGM() throws Exception {
-        sut.setProcessFactory(new MockFactory());
         final String gmPath = "random string";
         sut.setGMPath(gmPath);
 
         sut.borrowObject();
 
         assertThat(sut.getGMPath(), is(gmPath));
-        assertThat(capturedCommand[0], is(gmPath));
+        verify(builder).buildFactory(gmPath);
     }
 
     @Test
     public void close_destories_allProcesses() throws Exception {
-        PooledGMConnection[] pooled = new PooledGMConnection[MOCK_PROCESS_ARRAY_SIZE];
-        sut.setProcessFactory(new MockFactory());
-        for (int i = 0; i < MOCK_PROCESS_ARRAY_SIZE; i++)
+        final int processCount = 3;
+        PooledGMConnection[] pooled = new PooledGMConnection[processCount];
+        final ReaderWriterProcess[] processes = new ReaderWriterProcess[processCount];
+        for (int i = 0; i < processCount; i++) {
+            processes[i] = mock(ReaderWriterProcess.class);
+        }
+        when(factory.getProcess()).then(new Answer<ReaderWriterProcess>() {
+            int processIndex = 0;
+
+            @Override
+            public ReaderWriterProcess answer(InvocationOnMock invocation) throws Throwable {
+                if (processes[processIndex] == null) throw new IOException(READER_WRITER_PROCESS_FAILURE);
+                return processes[processIndex++];
+            }
+
+        });
+        for (int i = 0; i < processCount; i++)
             pooled[i] = sut.borrowObject();
-        for (int i = 0; i < MOCK_PROCESS_ARRAY_SIZE; i++)
+        for (int i = 0; i < processCount; i++)
             sut.returnObject(pooled[i]);
 
         sut.close();
 
-        for (int i = 0; i < MOCK_PROCESS_ARRAY_SIZE; i++)
+        for (int i = 0; i < processCount; i++)
             verify(processes[i]).destroy();
     }
 }

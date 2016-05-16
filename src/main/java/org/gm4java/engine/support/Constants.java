@@ -34,27 +34,4 @@ final class Constants {
     static final String GM_PASS = "OK";
     static final String GM_FAIL = "NG";
 
-    // @formatter:off
-    static final String[] GM_COMMAND = {
-        DEFAULT_GM_PATH, "batch",
-        "-escape", "windows",
-        "-feedback", "on",
-        "-pass", GM_PASS,
-        "-fail", GM_FAIL,
-        "-prompt", "off",
-        "-echo", "off",
-        "-safe-mode", "on",
-        "-"
-    };
-    static final String[] GM_COMMAND_V1_3_22 = {
-            DEFAULT_GM_PATH, "batch",
-            "-escape", "windows",
-            "-feedback", "on",
-            "-pass", GM_PASS,
-            "-fail", GM_FAIL,
-            "-prompt", "off",
-            "-echo", "off",
-            "-"
-    };
-    // @formatter:on
 }

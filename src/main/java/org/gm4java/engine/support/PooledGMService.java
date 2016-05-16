@@ -43,18 +43,7 @@ public class PooledGMService implements GMService {
      *            configuration of the GraphicsMagick process pool
      */
     public PooledGMService(@Nonnull GMConnectionPoolConfig config) {
-        pool = new GMConnectionPool(config, new CommandSelector(config.getGMPath()));
-    }
-    
-    /**
-     * Construct a new instance of {@linkplain PooledGMService} with given pool configuration.
-     * 
-     * @param config
-     *            configuration of the GraphicsMagick process pool
-     * @param commandSelector command selector. See {@link CommandSelector}
-     */
-    public PooledGMService(@Nonnull GMConnectionPoolConfig config, CommandSelector commandSelector) {
-        pool = new GMConnectionPool(config, commandSelector);
+        pool = new GMConnectionPool(config);
     }
 
     PooledGMService(GMConnectionPool pool) {
@@ -96,8 +85,8 @@ public class PooledGMService implements GMService {
         return new ConnectionWrapper(pool);
     }
 
-    void setProcessFactory(ReaderWriterProcess.Factory factory) {
-        pool.setProcessFactory(factory);
+    void setProcessFactoryBuilder(GMProcessFactory.Builder builder) {
+        pool.setProcessFactoryBuilder(builder);
     }
 
     private static final class ConnectionWrapper implements GMConnection {

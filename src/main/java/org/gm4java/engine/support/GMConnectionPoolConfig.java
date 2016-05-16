@@ -119,7 +119,7 @@ public class GMConnectionPoolConfig {
     /**
      * Default path to GraphcisMagick executable.
      */
-    public static final String DEFAULT_GM_PATH = "gm";
+    public static final String DEFAULT_GM_PATH = Constants.DEFAULT_GM_PATH;
 
     /**
      * Default value for the number of times a GraphicsMagick process can be used to execute commands before it gets
@@ -127,7 +127,7 @@ public class GMConnectionPoolConfig {
      */
     public static final int DEFAULT_EVICT_AFTER_NUMBER_OF_USE = 0;
 
-    private GenericObjectPool.Config config = new GenericObjectPool.Config();
+    private final GenericObjectPool.Config config = new GenericObjectPool.Config();
 
     private String gmPath = DEFAULT_GM_PATH;
 

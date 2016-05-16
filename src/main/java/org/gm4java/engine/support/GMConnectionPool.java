@@ -16,34 +16,29 @@ import javax.annotation.Nonnull;
  * 
  */
 class GMConnectionPool extends GenericObjectPool<PooledGMConnection> {
-    private ReaderWriterProcess.Factory factory = ReaderWriterProcessImpl.FACTORY;
-
-    private String[] gmCommand;
+    private GMProcessFactory.Builder builder;
+    private GMProcessFactory gmFactory;
     private int evictAfterNumberOfUse = GMConnectionPoolConfig.DEFAULT_EVICT_AFTER_NUMBER_OF_USE;
 
     /**
      * Construct a new instance of {@linkplain GMConnectionPool}.
      */
-    public GMConnectionPool(@Nonnull GMConnectionPoolConfig config, @Nonnull CommandSelector commandSelector) {
-        this(new Factory(), config, commandSelector);
+    GMConnectionPool(@Nonnull GMConnectionPoolConfig config) {
+        this(new Factory(), config);
     }
 
-    protected GMConnectionPool(Factory factory, GMConnectionPoolConfig config, CommandSelector commandSelector) {
-        super(factory, notNull(config));
+    private GMConnectionPool(Factory factory, GMConnectionPoolConfig config) {
+        super(factory, getParentConfig(config));
         factory.pool = this;
         evictAfterNumberOfUse = config.getEvictAfterNumberOfUse();
 
-        notNull(commandSelector).setGmPath(config.getGMPath());
-        this.gmCommand = commandSelector.gmCommand();
+        this.builder = GMProcessFactoryImpl.BUILDER;
+        gmFactory = builder.buildFactory(config.getGMPath());
     }
 
-    private static GenericObjectPool.Config notNull(GMConnectionPoolConfig config) {
+    private static GenericObjectPool.Config getParentConfig(GMConnectionPoolConfig config) {
         if (config == null) throw new NullPointerException("config");
         return config.getConfig();
-    }
-    private static CommandSelector notNull(CommandSelector commandSelector) {
-        if (commandSelector == null) throw new NullPointerException("commandselector");
-        return commandSelector;
     }
 
     /**
@@ -93,7 +88,7 @@ class GMConnectionPool extends GenericObjectPool<PooledGMConnection> {
      * @return the path to GraphicsMagick executable
      */
     public String getGMPath() {
-        return gmCommand[0];
+        return gmFactory.getGMPath();
     }
 
     /**
@@ -104,7 +99,7 @@ class GMConnectionPool extends GenericObjectPool<PooledGMConnection> {
      */
     public void setGMPath(@Nonnull String gmPath) {
         if (gmPath == null) throw new NullPointerException("gmPath");
-        gmCommand[0] = gmPath;
+        gmFactory = builder.buildFactory(gmPath);
     }
 
     /**
@@ -134,13 +129,14 @@ class GMConnectionPool extends GenericObjectPool<PooledGMConnection> {
         this.evictAfterNumberOfUse = evictAfterNumberOfUse;
     }
 
-    void setProcessFactory(ReaderWriterProcess.Factory factory) {
-        this.factory = factory;
+    void setProcessFactoryBuilder(GMProcessFactory.Builder builder) {
+        this.builder = builder;
+        gmFactory = builder.buildFactory(gmFactory.getGMPath());
     }
 
     ReaderWriterProcess createProcess() throws GMServiceException {
         try {
-            return factory.getProcess(gmCommand);
+            return gmFactory.getProcess();
         } catch (IOException e) {
             throw new GMServiceException(e.getMessage(), e);
         }

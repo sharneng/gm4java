@@ -19,7 +19,6 @@ import org.gm4java.engine.GMConnection;
 import org.gm4java.engine.GMException;
 import org.gm4java.engine.GMService;
 import org.gm4java.engine.GMServiceException;
-import org.gm4java.engine.support.ReaderWriterProcess.Factory;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,11 +38,19 @@ public class SimpleGMService implements GMService {
      */
     public static final String DEFAULT_GM_PATH = Constants.DEFAULT_GM_PATH;
 
-    private ReaderWriterProcess.Factory factory = ReaderWriterProcessImpl.FACTORY;
-    private final String[] gmCommand;
+    private final GMProcessFactory.Builder builder;
+    private GMProcessFactory factory;
 
+    /**
+     * Create a new instance of SimpleGMService.
+     */
     public SimpleGMService() {
-        this.gmCommand = new CommandSelector(DEFAULT_GM_PATH).gmCommand();
+        this(GMProcessFactoryImpl.BUILDER);
+    }
+
+    SimpleGMService(GMProcessFactory.Builder builder) {
+        this.builder = builder;
+        factory = builder.buildFactory(DEFAULT_GM_PATH);
     }
 
     /**
@@ -54,7 +61,7 @@ public class SimpleGMService implements GMService {
      */
     @Nonnull
     public String getGMPath() {
-        return gmCommand[0];
+        return factory.getGMPath();
     }
 
     /**
@@ -65,7 +72,7 @@ public class SimpleGMService implements GMService {
      */
     public void setGMPath(@Nonnull String gmPath) {
         if (gmPath == null) throw new NullPointerException("gmPath");
-        gmCommand[0] = gmPath;
+        factory = builder.buildFactory(gmPath);
     }
 
     /**
@@ -104,13 +111,9 @@ public class SimpleGMService implements GMService {
     @Nonnull
     public GMConnection getConnection() throws GMServiceException {
         try {
-            return new BasicGMConnection(factory.getProcess(gmCommand));
+            return new BasicGMConnection(factory.getProcess());
         } catch (IOException e) {
             throw new GMServiceException(e.getMessage(), e);
         }
-    }
-
-    void setProcessFactory(Factory factory) {
-        this.factory = factory;
     }
 }

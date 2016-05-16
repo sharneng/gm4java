@@ -50,6 +50,8 @@ public abstract class AbstractGMConnectionTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
     @Mock
+    protected GMProcessFactory factory;
+    @Mock
     protected ReaderWriterProcess process;
     @Mock
     protected Writer mockWriter;
