@@ -122,12 +122,17 @@ class GMProcessFactoryImpl implements GMProcessFactory {
         // GraphicsMagick 1.3.23 2015-11-07 Q16 http://www.GraphicsMagick.org/
         // Copyright (C) 2002-2015 GraphicsMagick Group.
         Scanner scanner = new Scanner(proc.getReader());
-        if (!scanner.hasNextLine()) {
-            throw new IOException(String.format("Could not detect your GraphicsMagick version, is '%s' in PATH?",
-                    gmPath));
+        try {
+            if (!scanner.hasNextLine()) {
+                throw new IOException(String.format("Could not detect your GraphicsMagick version, is '%s' in PATH?",
+                        gmPath));
+            }
+            String[] firstLineInWords = scanner.nextLine().split(" ");
+            version = new DefaultArtifactVersion(firstLineInWords[1]);
+            this.gmCommand = version.compareTo(version_1_3_22) >= 0 ? getGMCommand(gmPath) : getGMCommandSafeMode(gmPath);
+        } finally {
+            scanner.close();
+            proc.destroy();
         }
-        String[] firstLineInWords = scanner.nextLine().split(" ");
-        version = new DefaultArtifactVersion(firstLineInWords[1]);
-        this.gmCommand = version.compareTo(version_1_3_22) >= 0 ? getGMCommand(gmPath) : getGMCommandSafeMode(gmPath);
     }
 }
