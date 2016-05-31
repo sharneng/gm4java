@@ -9,7 +9,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
  */
 public enum WhenExhaustedAction {
     /**
-     * Throw a {@link NoSuchElementException}.
+     * Throw a {@link java.util.NoSuchElementException}.
      */
     FAIL(GenericObjectPool.WHEN_EXHAUSTED_FAIL),
 

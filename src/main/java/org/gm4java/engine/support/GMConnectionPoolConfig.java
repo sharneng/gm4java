@@ -16,6 +16,8 @@
 package org.gm4java.engine.support;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
+//SUPPRESS CHECKSTYLE UnusedImport BECAUSE it is used in javadoc.
+import org.apache.commons.pool.PoolableObjectFactory;
 // SUPPRESS CHECKSTYLE UnusedImport BECAUSE it is used in javadoc.
 import org.gm4java.engine.GMConnection;
 
@@ -37,7 +39,7 @@ import org.gm4java.engine.GMConnection;
  * <ul>
  * <li>
  * When {@link #setWhenExhaustedAction <i>whenExhaustedAction</i>} is {@link WhenExhaustedAction#FAIL},
- * {@link PooledGMService#getConnection()} will throw a {@link NoSuchElementException}</li>
+ * {@link PooledGMService#getConnection()} will throw a {@link java.util.NoSuchElementException}</li>
  * <li>
  * When {@link #setWhenExhaustedAction <i>whenExhaustedAction</i>} is {@link WhenExhaustedAction#GROW},
  * {@link PooledGMService#getConnection()} will create a new GM connection and return it (essentially making
@@ -47,7 +49,7 @@ import org.gm4java.engine.GMConnection;
  * {@link PooledGMService#getConnection()} will block (invoke {@link Object#wait()}) until a new or idle GM connection
  * is available. If a positive {@link #setMaxWait <i>maxWait</i>} value is supplied, then
  * {@link PooledGMService#getConnection()} will block for at most that many milliseconds, after which a
- * {@link NoSuchElementException} will be thrown. If {@link #setMaxWait <i>maxWait</i>} is non-positive, the
+ * {@link java.util.NoSuchElementException} will be thrown. If {@link #setMaxWait <i>maxWait</i>} is non-positive, the
  * {@link PooledGMService#getConnection()} method will block indefinitely.</li>
  * </ul>
  * The default <code>whenExhaustedAction</code> setting is {@link WhenExhaustedAction#BLOCK} and the default
@@ -60,7 +62,7 @@ import org.gm4java.engine.GMConnection;
  * and a different GM connection will be returned. The default setting for this parameter is <code>false.</code></li>
  * <li>
  * When {@link #setTestOnReturn <i>testOnReturn</i>} is set, the pool will attempt to validate each GM connection before
- * it is returned to the pool in the {@link #returnObject} method. (Using the provided factory's
+ * it is returned to the pool in the {@link GenericObjectPool#returnObject} method. (Using the provided factory's
  * {@link PoolableObjectFactory#validateObject} method.) Objects that fail to validate will be dropped from the pool.
  * The default setting for this parameter is <code>false.</code></li>
  * </ul>
@@ -80,26 +82,25 @@ import org.gm4java.engine.GMConnection;
  * {@link #setMinEvictableIdleTimeMillis <i>minEvictableIdleTimeMillis</i>} specifies the minimum amount of time that an
  * GM connection may sit idle in the pool before it is eligible for eviction due to idle time. When non-positive, no GM
  * connection will be dropped from the pool due to idle time alone. This setting has no effect unless
- * <code>timeBetweenEvictionRunsMillis > 0.</code> The default setting for this parameter is 30 minutes.</li>
+ * <code>timeBetweenEvictionRunsMillis &gt; 0.</code> The default setting for this parameter is 30 minutes.</li>
  * <li>
  * {@link #setTestWhileIdle <i>testWhileIdle</i>} indicates whether or not idle GM connections should be validated using
  * the factory's {@link PoolableObjectFactory#validateObject} method. Objects that fail to validate will be dropped from
- * the pool. This setting has no effect unless <code>timeBetweenEvictionRunsMillis > 0.</code> The default setting for
+ * the pool. This setting has no effect unless <code>timeBetweenEvictionRunsMillis &gt; 0.</code> The default setting for
  * this parameter is <code>false.</code></li>
  * <li>
  * {@link #setSoftMinEvictableIdleTimeMillis <i>softMinEvictableIdleTimeMillis</i>} specifies the minimum amount of time
  * a GM connection may sit idle in the pool before it is eligible for eviction by the idle GM connection evictor (if
  * any), with the extra condition that at least "minIdle" GM connection instances remain in the pool. When non-positive,
  * no GM connection will be evicted from the pool due to idle time alone. This setting has no effect unless
- * <code>timeBetweenEvictionRunsMillis > 0.</code> and it is superceded by {@link #setMinEvictableIdleTimeMillis
+ * <code>timeBetweenEvictionRunsMillis &gt; 0.</code> and it is superceded by {@link #setMinEvictableIdleTimeMillis
  * <i>minEvictableIdleTimeMillis</i>} (that is, if <code>minEvictableIdleTimeMillis</code> is positive, then
  * <code>softMinEvictableIdleTimeMillis</code> is ignored). The default setting for this parameter is -1 (disabled).</li>
  * <li>
  * {@link #setNumTestsPerEvictionRun <i>numTestsPerEvictionRun</i>} determines the number of GM connections examined in
  * each run of the idle GM connection evictor. This setting has no effect unless
- * <code>timeBetweenEvictionRunsMillis > 0.</code> The default setting for this parameter is 3.</li>
+ * <code>timeBetweenEvictionRunsMillis &gt; 0.</code> The default setting for this parameter is 3.</li>
  * </ul>
- * <p>
  * <p>
  * The pool can be configured to behave as a LIFO queue with respect to idle GM connections - always returning the most
  * recently used GM connection from the pool, or as a FIFO queue, where {@link PooledGMService#getConnection()} always
@@ -241,8 +242,8 @@ public class GMConnectionPoolConfig {
     /**
      * Sets the minimum number of {@link GMConnection}s allowed in the pool before the evictor thread (if active) spawns
      * new {@link GMConnection}s. Note that no {@link GMConnection}s are created when
-     * <code>numActive + numIdle >= maxActive.</code> This setting has no effect if the idle {@link GMConnection}
-     * evictor is disabled (i.e. if <code>timeBetweenEvictionRunsMillis <= 0</code>).
+     * <code>numActive + numIdle &gt;= maxActive.</code> This setting has no effect if the idle {@link GMConnection}
+     * evictor is disabled (i.e. if <code>timeBetweenEvictionRunsMillis &lt;= 0</code>).
      * 
      * @param minIdle
      *            The minimum number of {@link GMConnection}s.
@@ -255,8 +256,8 @@ public class GMConnectionPoolConfig {
 
     /**
      * Returns the minimum number of {@link GMConnection}s allowed in the pool before the evictor thread (if active)
-     * spawns new {@link GMConnection}s. (Note no {@link GMConnection}s are created when: numActive + numIdle >=
-     * maxActive)
+     * spawns new {@link GMConnection}s. (Note no {@link GMConnection}s are created when: <code>numActive + numIdle &gt;=
+     * maxActive)</code>
      * 
      * @return The minimum number of {@link GMConnection}s.
      * @see #setMinIdle
@@ -292,9 +293,9 @@ public class GMConnectionPoolConfig {
 
     /**
      * When <tt>true</tt>, {@link GMConnection}s will be {@link PoolableObjectFactory#validateObject validated} before
-     * being returned to the pool within the {@link #returnObject}.
+     * being returned to the pool within the {@link GenericObjectPool#returnObject}.
      * 
-     * @return <code>true</code> when {@link GMConnection}s will be validated after returned to {@link #returnObject}.
+     * @return <code>true</code> when {@link GMConnection}s will be validated after returned to {@link GenericObjectPool#returnObject}.
      * @see #setTestOnReturn
      */
     public boolean getTestOnReturn() {
@@ -303,10 +304,10 @@ public class GMConnectionPoolConfig {
 
     /**
      * When <tt>true</tt>, {@link GMConnection}s will be {@link PoolableObjectFactory#validateObject validated} before
-     * being returned to the pool within the {@link #returnObject}.
+     * being returned to the pool within the {@link GenericObjectPool#returnObject}.
      * 
      * @param testOnReturn
-     *            <code>true</code> so {@link GMConnection}s will be validated after returned to {@link #returnObject}.
+     *            <code>true</code> so {@link GMConnection}s will be validated after returned to {@link GenericObjectPool#returnObject}.
      * @see #getTestOnReturn
      */
     public void setTestOnReturn(boolean testOnReturn) {
@@ -352,7 +353,7 @@ public class GMConnectionPoolConfig {
      * Sets the max number of {@link GMConnection}s to examine during each run of the idle {@link GMConnection} evictor
      * thread (if any).
      * <p>
-     * When a negative value is supplied, <tt>ceil({@link #getNumIdle})/abs({@link #getNumTestsPerEvictionRun})</tt>
+     * When a negative value is supplied, <tt>ceil({@link GenericObjectPool#getNumIdle})/abs({@link GenericObjectPool#getNumTestsPerEvictionRun})</tt>
      * tests will be run. That is, when the value is <i>-n</i>, roughly one <i>n</i>th of the idle {@link GMConnection}s
      * will be tested per run. When the value is positive, the number of tests actually performed in each run will be
      * the minimum of this value and the number of instances idle in the pool.

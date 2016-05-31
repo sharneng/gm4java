@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * Provide implementations of {@link GMService} and {@link GMConnection}. 
+ * Provide implementations of {@link org.gm4java.engine.GMService} and {@link org.gm4java.engine.GMConnection}.
  * 
  * @author Kenneth Xu
  */

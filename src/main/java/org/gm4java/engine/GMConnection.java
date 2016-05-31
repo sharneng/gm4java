@@ -17,7 +17,7 @@ package org.gm4java.engine;
 
 /**
  * Encapsulates a connection to the GraphicsMagick process. An instance of {@linkplain GMConnection} is associated with
- * one and only one physical GraphicsMagick process. Client can call {@link #execute(String)} method many times during
+ * one and only one physical GraphicsMagick process. Client can call {@link #execute} method many times during
  * the life cycle {@linkplain GMConnection} instance. Client is required to call {@link #close()} method in the end of
  * the life cycle to terminate the physical GraphicsMagick process quickly.
  * <p>
